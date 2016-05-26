@@ -10,6 +10,7 @@ require "csv_importer/row"
 require "csv_importer/report"
 require "csv_importer/report_message"
 require "csv_importer/runner"
+require "csv_importer/validater"
 require "csv_importer/config"
 require "csv_importer/dsl"
 
@@ -91,6 +92,18 @@ module CSVImporter
   def run!
     if valid_header?
       @report = Runner.call(rows: rows, when_invalid: config.when_invalid,
+                            after_save_blocks: config.after_save_blocks)
+    else
+      @report
+    end
+  rescue CSV::MalformedCSVError => e
+    @report = Report.new(status: :invalid_csv_file, parser_error: e.message)
+  end
+
+  # Validate the import. Return a Report.
+  def validate!
+    if valid_header?
+      @report = Validater.call(rows: rows, when_invalid: config.when_invalid,
                             after_save_blocks: config.after_save_blocks)
     else
       @report
