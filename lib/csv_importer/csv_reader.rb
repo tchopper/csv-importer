@@ -2,6 +2,8 @@ module CSVImporter
 
   # Reads, sanitize and parse a CSV file
   class CSVReader
+    include Roo
+
     include Virtus.model
 
     attribute :content, String
@@ -12,9 +14,23 @@ module CSVImporter
 
     def csv_rows
       @csv_rows ||= begin
-        sane_content = sanitize_content(read_content)
-        separator = detect_separator(sane_content)
-        cells = CSV.parse(sane_content, col_sep: separator, quote_char: quote_char, skip_blanks: true, encoding: encoding)
+        final_path = nil
+        if file == nil
+          final_path = path
+        else
+          final_path = file.path
+        end
+
+        xlsx = Roo::Spreadsheet.open(final_path)
+        # sane_content = sanitize_content(read_content)
+        # separator = detect_separator(sane_content)
+        # cellc = Roo::Spreadsheet.open('./new_prices.xlsx')
+        # cells = CSV.parse(sane_content, col_sep: separator, quote_char: quote_char, skip_blanks: true, encoding: encoding)
+        cells = []
+        1.upto(xlsx.sheet(0).last_row) do |row_id|
+          cells.push xlsx.sheet(0).row(row_id)
+        end
+
         sanitize_cells(cells)
       end
     end
@@ -60,6 +76,9 @@ module CSVImporter
     def sanitize_cells(rows)
       rows.map do |cells|
         cells.map do |cell|
+          if cell.is_a? Float
+            cell = cell.to_i.to_s
+          end
           cell ? cell.strip : ""
         end
       end

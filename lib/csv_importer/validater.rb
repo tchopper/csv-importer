@@ -19,7 +19,6 @@ module CSVImporter
 
     # Persist the rows' model and return a `Report`
     def call
-      p "validater"
       if rows.empty?
         report.done!
         return report
@@ -43,13 +42,17 @@ module CSVImporter
     end
 
     def validate_rows!
-      p "validating each row"
-
       rows.each_with_index do |row, index|
         after_save_blocks.each { |block| block.call(row.model) }
         record = row.model
+        previous_errors = record.errors.dup.messages
         if !record.valid?
-          add_to_report(record)
+          if !previous_errors.blank?
+            previous_errors.each do |key, array|
+              record.errors.messages[key] = array
+            end
+          end
+          add_to_report({:model => record, :position => index+1})
         end
       end
 

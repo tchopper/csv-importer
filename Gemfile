@@ -8,3 +8,4 @@ gem 'guard-rspec'
 gem 'activemodel'
 gem 'simplecov', require: nil
 gem "codeclimate-test-reporter", require: nil
+gem "roo", "~> 2.7.0"

@@ -1,5 +1,6 @@
 require "csv"
 require "virtus"
+require "roo"
 
 require "csv_importer/version"
 require "csv_importer/csv_reader"
