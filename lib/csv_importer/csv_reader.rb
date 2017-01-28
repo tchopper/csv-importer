@@ -76,8 +76,11 @@ module CSVImporter
     def sanitize_cells(rows)
       rows.map do |cells|
         cells.map do |cell|
+          
           if cell.is_a? Float
-            cell = cell.to_i.to_s
+            cell = cell ? cell.to_i.to_s : ""
+          else
+            cell = cell ? cell.to_s : ""
           end
           cell ? cell.strip : ""
         end
